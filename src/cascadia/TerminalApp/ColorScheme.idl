@@ -1,0 +1,23 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+import "../TerminalSettings.idl";
+
+namespace TerminalApp
+{
+    [default_interface] runtimeclass ColorScheme {
+        ColorScheme();
+        ColorScheme(String name, UInt32 defaultFg, UInt32 defaultBg, UInt32 cursorColor);
+
+        void ApplyScheme(Microsoft.Terminal.TerminalControl.IControlSettings terminalSettings);
+
+        String Name { get; };
+
+        UInt32 Foreground { get; };
+        UInt32 Background { get; };
+        UInt32 SelectionBackground { get; };
+        UInt32 CursorColor { get; };
+
+        UInt32[] Table { get; };
+    }
+}

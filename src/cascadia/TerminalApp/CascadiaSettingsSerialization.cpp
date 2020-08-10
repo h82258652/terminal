@@ -654,7 +654,8 @@ void CascadiaSettings::_LayerOrCreateColorScheme(const Json::Value& schemeJson)
     }
     else
     {
-        _globals.AddColorScheme(ColorScheme::FromJson(schemeJson));
+        const auto scheme = implementation::ColorScheme::FromJson(schemeJson);
+        _globals.AddColorScheme(*scheme);
     }
 }
 
@@ -669,9 +670,9 @@ void CascadiaSettings::_LayerOrCreateColorScheme(const Json::Value& schemeJson)
 // Return Value:
 // - a ColorScheme that can be layered with the given json object, iff such a
 //   color scheme exists.
-ColorScheme* CascadiaSettings::_FindMatchingColorScheme(const Json::Value& schemeJson)
+implementation::ColorScheme* CascadiaSettings::_FindMatchingColorScheme(const Json::Value& schemeJson)
 {
-    if (auto schemeName = ColorScheme::GetNameFromJson(schemeJson))
+    if (auto schemeName = implementation::ColorScheme::GetNameFromJson(schemeJson))
     {
         auto& schemes = _globals.GetColorSchemes();
         auto iterator = schemes.find(*schemeName);
@@ -681,7 +682,7 @@ ColorScheme* CascadiaSettings::_FindMatchingColorScheme(const Json::Value& schem
             // maybe not the _safest_ thing, but we have a mind to make Profile
             // and ColorScheme winrt types in the future, so this will be safer
             // then.
-            return &iterator->second;
+            return winrt::get_self<implementation::ColorScheme>(iterator->second);
         }
     }
     return nullptr;

@@ -8,9 +8,11 @@
 #include "Utils.h"
 #include "JsonUtils.h"
 
+#include "ColorScheme.g.cpp"
+
 using namespace ::Microsoft::Console;
 using namespace TerminalApp;
-using namespace winrt::TerminalApp;
+using namespace winrt::TerminalApp::implementation;
 
 static constexpr std::string_view NameKey{ "name" };
 static constexpr std::string_view ForegroundKey{ "foreground" };
@@ -46,7 +48,7 @@ ColorScheme::ColorScheme() :
 {
 }
 
-ColorScheme::ColorScheme(std::wstring name, til::color defaultFg, til::color defaultBg, til::color cursorColor) :
+ColorScheme::ColorScheme(winrt::hstring name, uint32_t defaultFg, uint32_t defaultBg, uint32_t cursorColor) :
     _schemeName{ name },
     _table{},
     _defaultForeground{ defaultFg },
@@ -87,10 +89,10 @@ void ColorScheme::ApplyScheme(const winrt::Microsoft::Terminal::TerminalControl:
 // - json: an object which should be a serialization of a ColorScheme object.
 // Return Value:
 // - a new ColorScheme instance created from the values in `json`
-ColorScheme ColorScheme::FromJson(const Json::Value& json)
+winrt::com_ptr<ColorScheme> ColorScheme::FromJson(const Json::Value& json)
 {
-    ColorScheme result;
-    result.LayerJson(json);
+    auto result = winrt::make_self<ColorScheme>();
+    result->LayerJson(json);
     return result;
 }
 
@@ -138,32 +140,38 @@ void ColorScheme::LayerJson(const Json::Value& json)
     }
 }
 
-std::wstring_view ColorScheme::GetName() const noexcept
+winrt::hstring ColorScheme::Name() const noexcept
 {
-    return { _schemeName };
+    return { _schemeName.c_str() };
 }
 
-std::array<til::color, COLOR_TABLE_SIZE>& ColorScheme::GetTable() noexcept
+winrt::com_array<uint32_t> ColorScheme::Table() noexcept
 {
-    return _table;
+    winrt::com_array<uint32_t> result = { COLOR_TABLE_SIZE };
+    for (int i = 0; i < _table.size(); i++)
+    {
+        result[i] = _table[i];
+    }
+    return result;
+    //return _table;
 }
 
-til::color ColorScheme::GetForeground() const noexcept
+uint32_t ColorScheme::Foreground() const noexcept
 {
     return _defaultForeground;
 }
 
-til::color ColorScheme::GetBackground() const noexcept
+uint32_t ColorScheme::Background() const noexcept
 {
     return _defaultBackground;
 }
 
-til::color ColorScheme::GetSelectionBackground() const noexcept
+uint32_t ColorScheme::SelectionBackground() const noexcept
 {
     return _selectionBackground;
 }
 
-til::color ColorScheme::GetCursorColor() const noexcept
+uint32_t ColorScheme::CursorColor() const noexcept
 {
     return _cursorColor;
 }
